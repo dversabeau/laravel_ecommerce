@@ -14,7 +14,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('products.index');
+        $products = Products::all();
+        return view('products.index', compact('products'));
     }
 
     /**
@@ -49,7 +50,8 @@ class ProductController extends Controller
             'quantity_product' => $request->quantity_product
         ]);
 
-        return redirect()->route('product.index');
+        return redirect()->route('products.index')
+            ->with('success', 'Produit ajouté avec succès');
     }
 
     /**
@@ -71,7 +73,8 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        //
+        $product = Products::findOrFail($id);
+        return view('products.edit', compact('product'));
     }
 
     /**
@@ -83,7 +86,15 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $updateProduct = $request->validate([
+            'name_product' => 'required',
+            'description_product' => 'required',
+            'price_product' => 'required',
+            'quantity_product' => 'required'
+        ]);
+        Products::whereId($id)->update($updateProduct);
+        return redirect()->route('products.index')
+            ->with('success', 'Le produit à bien été mis à jour avec succès !');
     }
 
     /**
@@ -94,6 +105,8 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = Products::findOrFail($id);
+        $product->delete();
+        return redirect('/products')->with('success', 'Le Produit à bien été supprimé !');
     }
 }
